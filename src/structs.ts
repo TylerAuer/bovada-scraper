@@ -4,7 +4,7 @@ export interface Outcome {
   status: string;
   price: {
     id: string;
-    hongkong: string;
+    decimal: string;
     handicap?: string;
   };
 }

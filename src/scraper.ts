@@ -50,7 +50,7 @@ function parseResponseIntoBetList(response: BovadaApiResponse): BetData[] {
           for (let outcome of prop.outcomes) {
             const betOutcome: BetOutcome = {
               desc: outcome.description,
-              odds: parseFloat(outcome.price.hongkong),
+              odds: parseFloat(outcome.price.decimal),
             };
 
             if (outcome.price.handicap) {
@@ -72,19 +72,26 @@ function parseResponseIntoBetList(response: BovadaApiResponse): BetData[] {
 }
 
 function parseIntoCsv(data: BetData[]): string {
+  let maxOutcomes = 0;
+
   const listOfCSVRows = data.map((bet) => {
+    maxOutcomes = Math.max(maxOutcomes, bet.outcomes.length);
+
     const outcomes = bet.outcomes.map((outcome) => {
       const line = outcome.line ? `{${outcome.line}}` : '';
 
-      return `${outcome.desc} ${line}, ${outcome.odds}`;
+      const probability = Math.round((1 / outcome.odds) * 100);
+      const points = 100 - Math.min(99, Math.max(probability, 1));
+
+      return `${outcome.desc} ${line}, ${outcome.odds}, ${points}`;
     });
 
-    return `${bet.event},${bet.desc},${outcomes}`;
+    return `${bet.event},${bet.desc}, ${outcomes}`;
   });
+  const betSideString = 'Side, Decimal Odds, Points,';
+  const headerRow = `Event, Bet, ${betSideString.repeat(maxOutcomes)}\n`;
 
-  // Can inject a header row if I want
-
-  return listOfCSVRows.join('');
+  return headerRow + listOfCSVRows.join('\n');
 }
 
 function writeToCsv(filename: string, data: string) {
