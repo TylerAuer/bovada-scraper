@@ -1,0 +1,27 @@
+{
+  "name": "bovada-scraper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TylerAuer/bovada-scraper.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TylerAuer/bovada-scraper/issues"
+  },
+  "homepage": "https://github.com/TylerAuer/bovada-scraper#readme",
+  "dependencies": {
+    "@types/node": "^14.14.21",
+    "node-fetch": "^2.6.1",
+    "ts-node": "^9.1.1"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.5.7"
+  }
+}
