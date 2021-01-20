@@ -77,19 +77,24 @@ function parseIntoCsv(data: BetData[]): string {
   const listOfCSVRows = data.map((bet) => {
     maxOutcomes = Math.max(maxOutcomes, bet.outcomes.length);
 
+    // Generate row for each outcome
     const outcomes = bet.outcomes.map((outcome) => {
-      const line = outcome.line ? `{${outcome.line}}` : '';
+      const line = outcome.line ? `$$line={${outcome.line}}` : '';
 
       const probability = Math.round((1 / outcome.odds) * 100);
       const points = 100 - Math.min(99, Math.max(probability, 1));
 
-      return `${outcome.desc} ${line}, ${outcome.odds}, ${points}`;
+      return `${outcome.desc} ${line} $$odds=${outcome.odds} $$points=${points}`;
     });
 
-    return `${bet.event},${bet.desc}, ${outcomes}`;
+    const betSpreadOrTotal = bet.outcomes[0].line
+      ? `$$number=${bet.outcomes[0].line}`
+      : '';
+
+    return `${bet.event}, ${bet.desc} ${betSpreadOrTotal}, ${outcomes}`;
   });
-  const betSideString = 'Side, Decimal Odds, Points,';
-  const headerRow = `Event, Bet, ${betSideString.repeat(maxOutcomes)}\n`;
+
+  const headerRow = `Event, Bet, ${'Bet Side,'.repeat(listOfCSVRows.length)}\n`;
 
   return headerRow + listOfCSVRows.join('\n');
 }
