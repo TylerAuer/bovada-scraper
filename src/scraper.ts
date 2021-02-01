@@ -1,18 +1,26 @@
 import fs from 'fs';
 import fetch from 'node-fetch';
 import { BovadaApiResponse, BetData, BetOutcome } from './structs';
-/**
- * Given a bunch of endpoints, grab all of the bets, format them, and dump them
- * into a csv file I can import into google sheets
- */
-export const endpoints = [
-  // 'https://www.bovada.lv/services/sports/event/coupon/events/A/description/football/nfl?marketFilterId=rank&preMatchOnly=true&lang=en',
-  'https://www.bovada.lv/services/sports/event/coupon/events/A/description/football/nfl',
+
+const endpoints = [
+  'https://www.bovada.lv/services/sports/event/coupon/events/A/description/football/super-bowl/kansas-city-chiefs-tampa-bay-buccaneers-202102071830?lang=en',
+  'https://www.bovada.lv/services/sports/event/coupon/events/A/description/football/super-bowl-specials?marketFilterId=rank&preMatchOnly=true&lang=en',
+  'https://www.bovada.lv/services/sports/event/coupon/events/A/description/football/super-bowl-touchdown-and-field-goal-propositions/td-fg-propositions-super-bowl-55-202102071830?lang=en',
+  'https://www.bovada.lv/services/sports/event/coupon/events/A/description/football/super-bowl-defense-and-special-team-propositions/defense-sp-team-props-super-bowl-55-202102071830?lang=en',
 ];
 
-scrapeEndpoints(endpoints);
+buildCsvOfPropsFromBovadaEndpoints(endpoints, 'csv/2021.csv');
 
-async function scrapeEndpoints(endpoints: string[]) {
+/**
+ * Takes a list of Bovada API endpoints and turns them into a CSV for the
+ * Super Stupid Props Game
+ *
+ * @param endpoints List of endpoints to parse into bets for CSV
+ */
+async function buildCsvOfPropsFromBovadaEndpoints(
+  endpoints: string[],
+  filename: string
+) {
   const bovadaApiResponses = await Promise.all(
     endpoints.map((endpoint) => fetchData(endpoint))
   );
@@ -21,17 +29,20 @@ async function scrapeEndpoints(endpoints: string[]) {
     .map((res) => parseResponseIntoBetList(res))
     .reduce((prev, next) => [...prev, ...next]);
 
-  // console.log(JSON.stringify(bets, null, 2));
-
-  const csvString = parseIntoCsv(bets);
-  writeToCsv('bets.csv', csvString);
+  const csvString = combineRowsAndHeaderIntoCsvString(bets);
+  writeToCsv(filename, csvString);
 }
 
-async function fetchData(url: string): Promise<BovadaApiResponse> {
+async function fetchData(url: string): Promise<any> {
   const res = await fetch(url);
   return await res.json();
 }
 
+/**
+ * Parses Bovada prop into a row for the CSV
+ *
+ * @param response BovadaApiResponse Object
+ */
 function parseResponseIntoBetList(response: BovadaApiResponse): BetData[] {
   const betList: BetData[] = [];
 
@@ -43,6 +54,11 @@ function parseResponseIntoBetList(response: BovadaApiResponse): BetData[] {
         // const displayGroupDesc = displayGroup.description;
 
         for (let prop of displayGroup.markets) {
+          // Sometimes there is a placeholder prop that redirects users to
+          // other sections. The placeholder always has an empty outcomes list.
+          // So, this if() skips the placeholder
+          if (!prop.outcomes.length) continue;
+
           const propDesc = prop.description;
           // const propDescKey = prop.descriptionKey;
           const betOutcomes: BetOutcome[] = [];
@@ -71,7 +87,13 @@ function parseResponseIntoBetList(response: BovadaApiResponse): BetData[] {
   return betList;
 }
 
-function parseIntoCsv(data: BetData[]): string {
+/**
+ * Add header rows and line breaks. Returning a string that can be written
+ * to a CSV file.
+ *
+ * @param data A list of CSV rows of bet data
+ */
+function combineRowsAndHeaderIntoCsvString(data: BetData[]): string {
   let maxOutcomes = 0;
 
   const listOfCSVRows = data.map((bet) => {
