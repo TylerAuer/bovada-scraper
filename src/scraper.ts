@@ -3,13 +3,23 @@ import fetch from 'node-fetch';
 import { BovadaApiResponse, BetData, BetOutcome } from './structs';
 
 const endpoints = [
+  // Game Props + Lines
   'https://www.bovada.lv/services/sports/event/coupon/events/A/description/football/super-bowl/kansas-city-chiefs-tampa-bay-buccaneers-202102071830?lang=en',
+  // Specials
   'https://www.bovada.lv/services/sports/event/coupon/events/A/description/football/super-bowl-specials?marketFilterId=rank&preMatchOnly=true&lang=en',
+  // TDs and FGs
   'https://www.bovada.lv/services/sports/event/coupon/events/A/description/football/super-bowl-touchdown-and-field-goal-propositions/td-fg-propositions-super-bowl-55-202102071830?lang=en',
+  // Defense and Special Teams
   'https://www.bovada.lv/services/sports/event/coupon/events/A/description/football/super-bowl-defense-and-special-team-propositions/defense-sp-team-props-super-bowl-55-202102071830?lang=en',
+  // Receiving props
+  'https://www.bovada.lv/services/sports/event/coupon/events/A/description/football/super-bowl-receiving-propositions/receiving-propositions-super-bowl-55-202102071830?lang=en',
+  // Rushing props
+  'https://www.bovada.lv/services/sports/event/coupon/events/A/description/football/super-bowl-rushing-propositions/rushing-propositions-super-bowl-55-202102071830?lang=en',
+  // QB props
+  'https://www.bovada.lv/services/sports/event/coupon/events/A/description/football/super-bowl-quarterback-propositions/quarterback-props-super-bowl-55-202102071830?lang=en',
 ];
 
-buildCsvOfPropsFromBovadaEndpoints(endpoints, 'csv/2021.csv');
+buildCsvOfPropsFromBovadaEndpoints(endpoints, 'csv/2021-02.csv');
 
 /**
  * Takes a list of Bovada API endpoints and turns them into a CSV for the
